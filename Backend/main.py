@@ -21,10 +21,9 @@ load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent
 
-MODEL_PATH = str(BASE_DIR / "best_final.keras")
+MODEL_PATH = str(BASE_DIR / "skin_model.pt")
 
-# 🔥 FIXED DOWNLOAD URL
-MODEL_URL = "https://drive.google.com/uc?export=download&id=1dxjm9Z-PLKv5iFplcyuJ_sPHN9z2kelz"
+MODEL_URL = "https://drive.google.com/uc?export=download&id=1Ni94864EZ6jNUC8zi5qn_eCOCw4FM5VZ"
 
 SCALES_PATH = str(BASE_DIR / "class_scales.json")
 
@@ -46,19 +45,21 @@ model = None
 device = "cpu"
 demo_mode = True
 
-# 🔥 SAFE DOWNLOAD
 def download_model():
     if not os.path.exists(MODEL_PATH):
         print("⬇️ Downloading model...")
+
+        import gdown
         gdown.download(MODEL_URL, MODEL_PATH, quiet=False, fuzzy=True)
 
         size = os.path.getsize(MODEL_PATH)
         print(f"📦 Model size: {size/(1024*1024):.2f} MB")
 
+        # 🔥 CRITICAL CHECK
         if size < 5 * 1024 * 1024:
-            raise RuntimeError("Downloaded file is invalid (too small)")
+            raise RuntimeError("❌ Download failed (file too small)")
 
-        print("✅ Model downloaded")
+        print("✅ Model downloaded successfully")
 
 def get_model():
     global model, device, demo_mode
