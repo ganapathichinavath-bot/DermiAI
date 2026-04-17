@@ -66,11 +66,16 @@ def get_model():
     if model is None:
         try:
             download_model()
+
+            print("📂 Loading model from:", MODEL_PATH)
+
             model, device, demo_mode = load_model(MODEL_PATH)
+
             print("✅ Model loaded successfully")
+
         except Exception as e:
-            print("❌ Model loading failed:", e)
-            model = None
+            print("🔥 REAL ERROR:", repr(e))
+            return {"error": str(e)}, "cpu", True   # 👈 expose error
 
     return model, device, demo_mode
 
@@ -126,8 +131,8 @@ async def predict(file: UploadFile = File(...)):
 
         model, device, demo_mode = get_model()
 
-        if model is None:
-            return {"error": "Model failed to load"}
+        if isinstance(model, dict) and "error" in model:
+            return model
 
         result = run_inference(
             model, device, image_bytes, class_scales, demo_mode
