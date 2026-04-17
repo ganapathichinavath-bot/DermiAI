@@ -13,6 +13,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, EmailStr, Field
 from PIL import Image, UnidentifiedImageError
 from sqlalchemy.orm import Session
+from fastapi import HTTPException, UploadFile, File
 
 from auth import create_access_token, get_current_user, get_optional_user, hash_password, verify_password
 from database import ScanHistory, User, create_tables, get_db
@@ -55,6 +56,9 @@ demo_mode = True
 
 def get_model():
     global model, device, demo_mode
+    if not os.path.exists(MODEL_PATH):
+        print("⚠️ Model not found")
+        return None, "cpu", True
     if model is None:
         try:
             model, device, demo_mode = load_model(MODEL_PATH)
@@ -123,70 +127,29 @@ def me(current_user: User = Depends(get_current_user)) -> dict:
 
 
 @app.post("/predict")
-async def predict(
-    file: UploadFile = File(...),
-    current_user: User | None = Depends(get_optional_user),
-    db: Session = Depends(get_db),
-) -> dict:
-    content_type = (file.content_type or "").lower()
-    if not content_type.startswith("image/"):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Only image uploads are supported.")
-
-    image_bytes = await file.read()
-    if not image_bytes:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Uploaded file is empty.")
-    if len(image_bytes) > MAX_UPLOAD_MB * 1024 * 1024:
-        raise HTTPException(status_code=413, detail="Image exceeds upload limit.")
-
+async def predict(file: UploadFile = File(...)):
     try:
-        Image.open(io.BytesIO(image_bytes)).verify()
-    except (UnidentifiedImageError, OSError) as exc:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid image file.") from exc
+        image_bytes = await file.read()
 
-    scan_id = uuid.uuid4().hex
-    _upload_path, original_url = save_upload(image_bytes, f"{scan_id}.jpg")
-    model, device, demo_mode = get_model()
+        print("✅ File received")
 
-    inference = run_inference(model, device, image_bytes, class_scales, demo_mode)
-    _heatmap_path, heatmap_url = save_array_image(inference["heatmap_np"], f"{scan_id}_gradcam")
+        model, device, demo_mode = get_model()
+        print("✅ Model loaded:", model is not None)
 
-    if current_user:
-        history_item = ScanHistory(
-            user_id=current_user.id,
-            original_url=original_url,
-            heatmap_url=heatmap_url,
-            prediction=inference["prediction"],
-            prediction_name=inference["prediction_name"],
-            confidence=inference["confidence"],
-            risk=inference["risk"],
-            risk_level=inference["risk_level"],
-            top3=json.dumps(inference["top3"]),
-            explanation=json.dumps(inference["explanation"]),
+        if model is None:
+            return {"error": "Model not loaded", "demo": True}
+
+        inference = run_inference(
+            model, device, image_bytes, class_scales, demo_mode
         )
-        db.add(history_item)
-        db.commit()
-        db.refresh(history_item)
-        history_id = history_item.id
-        created_at = history_item.created_at.isoformat()
-    else:
-        history_id = None
-        created_at = None
 
-    return {
-        "id": history_id,
-        "prediction": inference["prediction"],
-        "prediction_name": inference["prediction_name"],
-        "confidence": inference["confidence"],
-        "risk": inference["risk"],
-        "risk_level": inference["risk_level"],
-        "top3": inference["top3"],
-        "original_url": original_url,
-        "heatmap_url": heatmap_url,
-        "explanation": inference["explanation"],
-        "model_mode": inference["model_mode"],
-        "created_at": created_at,
-    }
+        print("✅ Inference done")
 
+        return inference
+
+    except Exception as e:
+        print("🔥 ERROR:", str(e))
+        return {"error": str(e)}
 
 @app.get("/history")
 def history(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)) -> list[dict]:
