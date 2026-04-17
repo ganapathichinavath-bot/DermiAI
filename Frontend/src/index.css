@@ -1,0 +1,96 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+  --bg: #0b0f1a;
+  --bg-soft: #101827;
+  --bg-panel: rgba(10, 18, 31, 0.72);
+  --border: rgba(148, 163, 184, 0.14);
+  --text: #e5eefb;
+  --muted: #8ea0bd;
+  --accent: #5eead4;
+  --accent-2: #38bdf8;
+  --danger: #fb7185;
+  --warning: #f59e0b;
+  --success: #34d399;
+}
+
+@layer base {
+  * {
+    @apply border-slate-800;
+    box-sizing: border-box;
+  }
+
+  html {
+    min-height: 100%;
+    background:
+      radial-gradient(circle at top left, rgba(56, 189, 248, 0.16), transparent 24rem),
+      radial-gradient(circle at top right, rgba(94, 234, 212, 0.14), transparent 20rem),
+      linear-gradient(180deg, #08111f 0%, #0b0f1a 52%, #050914 100%);
+  }
+
+  body {
+    min-height: 100vh;
+    margin: 0;
+    font-family: "Manrope", "Space Grotesk", "Segoe UI", sans-serif;
+    color: var(--text);
+    background: transparent;
+  }
+
+  #root {
+    min-height: 100vh;
+  }
+
+  button,
+  input,
+  textarea {
+    font: inherit;
+  }
+}
+
+@layer components {
+  .panel {
+    @apply rounded-3xl border border-white/10 bg-slate-950/50 backdrop-blur-xl;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.28);
+  }
+
+  .panel-soft {
+    @apply rounded-2xl border border-white/10 bg-white/5 backdrop-blur;
+  }
+
+  .field {
+    @apply w-full rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 text-sm text-slate-100 outline-none transition;
+  }
+
+  .field:focus {
+    @apply border-cyan-300/60 ring-2 ring-cyan-300/20;
+  }
+
+  .button-primary {
+    @apply inline-flex items-center justify-center rounded-2xl px-5 py-3 text-sm font-semibold text-slate-950 transition;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  }
+
+  .button-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 15px 30px rgba(56, 189, 248, 0.2);
+  }
+
+  .button-secondary {
+    @apply inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-medium text-slate-200 transition;
+  }
+
+  .button-secondary:hover {
+    @apply bg-white/10;
+  }
+
+  .pill {
+    @apply inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em];
+  }
+
+  .page-grid {
+    @apply grid min-h-screen lg:grid-cols-[260px_minmax(0,1fr)];
+  }
+}

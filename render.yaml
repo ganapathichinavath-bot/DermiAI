@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: dermai-backend
+    env: python
+    rootDir: Backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    plan: free
+  - type: web
+    name: dermai-frontend
+    env: static
+    rootDir: Frontend
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    plan: free

@@ -1,0 +1,36 @@
+# Models
+*.h5
+*.keras
+*.pth
+*.pt
+*.ckpt
+*.onnx
+
+# Data
+dataset/
+data/
+train/
+val/
+test/
+images/
+
+# Checkpoints
+checkpoints/
+logs/
+runs/
+weights/
+
+# Python
+__pycache__/
+*.pyc
+
+# Notebook
+.ipynb_checkpoints/
+
+# Env
+venv/
+.env
+
+# OS
+.DS_Store
+Thumbs.db
