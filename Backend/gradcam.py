@@ -81,12 +81,12 @@ def load_model(model_path: str | Path | None = None) -> tuple[dict, str | None, 
             "Keras/TensorFlow is not installed correctly. Run `pip install tensorflow keras` in Backend first."
         ) from exc
 
-    try:
-        model = keras.models.load_model(resolved_path, compile=False)
-        print("✅ Keras model loaded successfully")
-    except Exception as e:
-        print("❌ Keras loading error:", e)
-        raise
+    model = keras.models.load_model(
+        resolved_path,
+        compile=False,
+        safe_mode=False
+    )
+    print("✅ Keras model loaded")
     model.trainable = False
     last_conv_name = _find_last_conv_layer(model)
 

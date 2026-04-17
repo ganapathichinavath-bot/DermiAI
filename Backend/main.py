@@ -6,7 +6,7 @@ from pathlib import Path
 
 import gdown
 from dotenv import load_dotenv
-from fastapi import Depends, FastAPI, File, HTTPException, UploadFile, status
+from fastapi import Depends, FastAPI, File, UploadFile, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, EmailStr, Field
@@ -21,15 +21,15 @@ load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent
 
-# 🔥 YOUR MODEL CONFIG
 MODEL_PATH = str(BASE_DIR / "best_final.keras")
-MODEL_URL = "https://drive.google.com/uc?id=1dxjm9Z-PLKv5iFplcyuJ_sPHN9z2kelz"
+
+# 🔥 FIXED DOWNLOAD URL
+MODEL_URL = "https://drive.google.com/uc?export=download&id=1dxjm9Z-PLKv5iFplcyuJ_sPHN9z2kelz"
 
 SCALES_PATH = str(BASE_DIR / "class_scales.json")
 
 app = FastAPI(title="Derm AI", version="1.0.0")
 
-# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -38,7 +38,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Setup
 ensure_storage_dirs()
 create_tables()
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
@@ -47,13 +46,18 @@ model = None
 device = "cpu"
 demo_mode = True
 
-MODEL_PATH = str(BASE_DIR / "best_final.keras")
-MODEL_URL = "https://drive.google.com/uc?id=1dxjm9Z-PLKv5iFplcyuJ_sPHN9z2kelz"
-
+# 🔥 SAFE DOWNLOAD
 def download_model():
     if not os.path.exists(MODEL_PATH):
         print("⬇️ Downloading model...")
-        gdown.download(MODEL_URL, MODEL_PATH, quiet=False)
+        gdown.download(MODEL_URL, MODEL_PATH, quiet=False, fuzzy=True)
+
+        size = os.path.getsize(MODEL_PATH)
+        print(f"📦 Model size: {size/(1024*1024):.2f} MB")
+
+        if size < 5 * 1024 * 1024:
+            raise RuntimeError("Downloaded file is invalid (too small)")
+
         print("✅ Model downloaded")
 
 def get_model():
@@ -67,18 +71,17 @@ def get_model():
         except Exception as e:
             print("❌ Model loading failed:", e)
             model = None
-            device = "cpu"
-            demo_mode = True
 
     return model, device, demo_mode
+
 class_scales = load_scales(SCALES_PATH)
 
 # ================= AUTH =================
 
 class RegisterRequest(BaseModel):
-    username: str = Field(min_length=3, max_length=32)
+    username: str
     email: EmailStr
-    password: str = Field(min_length=6, max_length=128)
+    password: str
 
 class LoginRequest(BaseModel):
     username: str
@@ -88,8 +91,7 @@ class LoginRequest(BaseModel):
 def health():
     return {
         "status": "ok",
-        "model_loaded": model is not None,
-        "device": str(device),
+        "model_loaded": model is not None
     }
 
 @app.post("/auth/register", status_code=status.HTTP_201_CREATED)
@@ -113,10 +115,7 @@ def login(payload: LoginRequest, db: Session = Depends(get_db)):
     if not user or not verify_password(payload.password, user.hashed_password):
         raise HTTPException(401, "Invalid credentials")
 
-    return {
-        "access_token": create_access_token(user.username),
-        "token_type": "bearer",
-    }
+    return {"access_token": create_access_token(user.username)}
 
 # ================= PREDICT =================
 
@@ -124,8 +123,6 @@ def login(payload: LoginRequest, db: Session = Depends(get_db)):
 async def predict(file: UploadFile = File(...)):
     try:
         image_bytes = await file.read()
-
-        print("📥 File received")
 
         model, device, demo_mode = get_model()
 
@@ -136,23 +133,17 @@ async def predict(file: UploadFile = File(...)):
             model, device, image_bytes, class_scales, demo_mode
         )
 
-        print("✅ Inference done")
-
         return result
 
     except Exception as e:
-        print("🔥 ERROR:", str(e))
+        print("🔥 ERROR:", e)
         return {"error": str(e)}
 
 # ================= HISTORY =================
 
 @app.get("/history")
 def history(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    scans = (
-        db.query(ScanHistory)
-        .filter(ScanHistory.user_id == current_user.id)
-        .all()
-    )
+    scans = db.query(ScanHistory).filter(ScanHistory.user_id == current_user.id).all()
 
     return [
         {
