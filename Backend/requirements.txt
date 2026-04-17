@@ -7,12 +7,12 @@ python-multipart==0.0.9
 pillow==10.3.0
 opencv-python-headless==4.9.0.80
 
-numpy==1.24.3   ✅ FIXED
+numpy==1.24.3  
 
 torch==2.3.1
 torchvision==0.18.1
 
-tensorflow-cpu==2.15.0   ❗ (REMOVE tensorflow==2.13.0)
+tensorflow-cpu==2.15.0 
 
 python-dotenv==1.0.1
 aiofiles==23.2.1
