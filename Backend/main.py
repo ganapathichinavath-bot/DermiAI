@@ -49,7 +49,21 @@ ensure_storage_dirs()
 create_tables()
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
-model, device, demo_mode = load_model(MODEL_PATH)
+model = None
+device = "cpu"
+demo_mode = True
+
+def get_model():
+    global model, device, demo_mode
+    if model is None:
+        try:
+            model, device, demo_mode = load_model(MODEL_PATH)
+        except Exception as e:
+            print("⚠️ Model loading failed, switching to demo mode:", e)
+            model = None
+            device = "cpu"
+            demo_mode = True
+    return model, device, demo_mode
 class_scales = load_scales(SCALES_PATH)
 
 
@@ -131,6 +145,8 @@ async def predict(
 
     scan_id = uuid.uuid4().hex
     _upload_path, original_url = save_upload(image_bytes, f"{scan_id}.jpg")
+    model, device, demo_mode = get_model()
+
     inference = run_inference(model, device, image_bytes, class_scales, demo_mode)
     _heatmap_path, heatmap_url = save_array_image(inference["heatmap_np"], f"{scan_id}_gradcam")
 
