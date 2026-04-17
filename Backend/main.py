@@ -43,19 +43,19 @@ ensure_storage_dirs()
 create_tables()
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
-# GLOBAL MODEL
 model = None
 device = "cpu"
 demo_mode = True
 
-# 🔥 DOWNLOAD MODEL
+MODEL_PATH = str(BASE_DIR / "best_final.keras")
+MODEL_URL = "https://drive.google.com/uc?id=1dxjm9Z-PLKv5iFplcyuJ_sPHN9z2kelz"
+
 def download_model():
     if not os.path.exists(MODEL_PATH):
-        print("⬇️ Downloading model from Google Drive...")
+        print("⬇️ Downloading model...")
         gdown.download(MODEL_URL, MODEL_PATH, quiet=False)
         print("✅ Model downloaded")
 
-# 🔥 LOAD MODEL (LAZY)
 def get_model():
     global model, device, demo_mode
 
@@ -71,7 +71,6 @@ def get_model():
             demo_mode = True
 
     return model, device, demo_mode
-
 class_scales = load_scales(SCALES_PATH)
 
 # ================= AUTH =================
