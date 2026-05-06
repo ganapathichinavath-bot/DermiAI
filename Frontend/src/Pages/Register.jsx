@@ -1,51 +1,65 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import api from '../api'
+import { useNavigate, Link } from 'react-router-dom'
+import axios from 'axios'
 
 export default function Register() {
-  const [form, setForm]     = useState({ username: '', email: '', password: '' })
-  const [error, setError]   = useState('')
-  const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
+  const [username, setUsername] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState(null)
+  const [loading, setLoading] = useState(false)
 
-  const handleSubmit = async (e) => {
+  const submit = async (e) => {
     e.preventDefault()
-    setLoading(true); setError('')
+    setError(null)
+    setLoading(true)
     try {
-      await api.post('/register', form)
-      navigate('/login')
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'
+      await axios.post(`${apiUrl}/auth/register`, { username, email, password })
+      navigate('/login', { replace: true })
     } catch (err) {
-      setError(err.response?.data?.detail || 'Registration failed')
-    } finally { setLoading(false) }
+      setError(err?.response?.data?.detail || err?.response?.data || 'Registration failed. Please try again.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-950 p-4">
-      <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md bg-slate-900 rounded-2xl p-8 border border-slate-800">
-        <h1 className="text-3xl font-bold gradient-text mb-2">Create Account</h1>
-        <p className="text-slate-400 mb-8 text-sm">Join DermAI platform</p>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {[['username','text','Username'],['email','email','Email'],['password','password','Password']].map(([name,type,label]) => (
-            <div key={name}>
-              <label className="text-slate-300 text-sm block mb-1">{label}</label>
-              <input type={type} value={form[name]}
-                onChange={e => setForm(f => ({ ...f, [name]: e.target.value }))}
-                className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-violet-500"
-                placeholder={`Enter ${label.toLowerCase()}`} required />
-            </div>
-          ))}
-          {error && <p className="text-red-400 text-sm bg-red-950 border border-red-800 rounded-lg px-4 py-2">{error}</p>}
-          <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-            type="submit" disabled={loading}
-            className="w-full bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white py-3 rounded-xl font-semibold">
-            {loading ? 'Creating...' : 'Create Account'}
-          </motion.button>
+    <div className="min-h-screen bg-[#0B0F19] flex items-center justify-center p-6">
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md glass-panel p-8">
+        <h1 className="text-2xl font-bold text-white mb-2">Create account</h1>
+        <p className="text-gray-400 mb-8">Registration is optional. Guests can still run diagnoses.</p>
+
+        {error && (
+          <div className="mb-6 text-sm text-rose-300 bg-rose-500/10 border border-rose-500/20 rounded-xl p-3">
+            {String(error)}
+          </div>
+        )}
+
+        <form onSubmit={submit} className="space-y-4">
+          <div>
+            <label className="block text-sm text-gray-400 mb-1">Username</label>
+            <input value={username} onChange={(e) => setUsername(e.target.value)} className="w-full bg-gray-900/40 border border-white/10 rounded-2xl px-4 py-3 text-white outline-none focus:border-indigo-400" required />
+          </div>
+          <div>
+            <label className="block text-sm text-gray-400 mb-1">Email</label>
+            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-gray-900/40 border border-white/10 rounded-2xl px-4 py-3 text-white outline-none focus:border-indigo-400" required />
+          </div>
+          <div>
+            <label className="block text-sm text-gray-400 mb-1">Password</label>
+            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full bg-gray-900/40 border border-white/10 rounded-2xl px-4 py-3 text-white outline-none focus:border-indigo-400" required />
+          </div>
+
+          <button disabled={loading} className="btn-primary w-full disabled:opacity-60">
+            {loading ? 'Creating...' : 'Register'}
+          </button>
         </form>
-        <p className="text-slate-400 text-sm text-center mt-6">
-          Already have an account? <Link to="/login" className="text-violet-400">Sign in</Link>
-        </p>
+
+        <div className="mt-6 text-sm text-gray-400">
+          Already have an account? <Link className="text-indigo-400 hover:text-indigo-300" to="/login">Login</Link>.
+        </div>
       </motion.div>
     </div>
   )

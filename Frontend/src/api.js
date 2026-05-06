@@ -1,9 +1,11 @@
 import axios from 'axios'
 import useStore from './store/useStore'
 
+export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000',
-  timeout: 45000,
+  baseURL: API_BASE_URL,
+  timeout: 60000,
 })
 
 api.interceptors.request.use((config) => {
@@ -16,9 +18,12 @@ api.interceptors.request.use((config) => {
 
 export function assetUrl(path) {
   if (!path) return ''
-  if (path.startsWith('http://') || path.startsWith('https://')) return path
-  const base = import.meta.env.VITE_API_URL || 'http://localhost:8000'
-  return `${base.replace(/\/$/, '')}${path.startsWith('/') ? path : `/${path}`}`
+  if (/^https?:\/\//.test(path)) return path
+  return `${API_BASE_URL.replace(/\/$/, '')}${path.startsWith('/') ? path : `/${path}`}`
+}
+
+export function getErrorMessage(error, fallback = 'Something went wrong. Please try again.') {
+  return error?.response?.data?.detail || fallback
 }
 
 export default api

@@ -1,35 +1,50 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
+function createGuestRecord(scan) {
+  return {
+    ...scan,
+    id: scan.id ?? `guest-${crypto.randomUUID()}`,
+    created_at: scan.created_at ?? new Date().toISOString(),
+  }
+}
+
 const useStore = create(
   persist(
-    (set, get) => ({
+    (set) => ({
       token: null,
-      user: null,
+      user: null, // Will store { id, email, display_name, photo_url }
       selectedImage: null,
       activeScan: null,
       guestHistory: [],
       processingError: null,
       processingStep: 0,
 
-      setToken: (token) => set({ token }),
-      setUser: (user) => set({ user }),
+      setSession: ({ token, user }) => set({ token, user }),
+      clearSession: () => set({ token: null, user: null }),
       setSelectedImage: (selectedImage) => set({ selectedImage }),
       clearSelectedImage: () => set({ selectedImage: null }),
       setActiveScan: (activeScan) => set({ activeScan }),
+      clearActiveScan: () => set({ activeScan: null }),
       setProcessingError: (processingError) => set({ processingError }),
       setProcessingStep: (processingStep) => set({ processingStep }),
-      clearProcessingState: () => set({ processingError: null, processingStep: 0 }),
+      resetProcessingState: () => set({ processingError: null, processingStep: 0 }),
       addGuestScan: (scan) =>
         set((state) => ({
-          guestHistory: [scan, ...state.guestHistory].slice(0, 20),
+          guestHistory: [createGuestRecord(scan), ...state.guestHistory].slice(0, 20),
+        })),
+      removeGuestScan: (id) =>
+        set((state) => ({
+          guestHistory: state.guestHistory.filter((s) => s.id !== id),
         })),
       logout: () =>
         set({
           token: null,
           user: null,
           activeScan: null,
-          guestHistory: get().guestHistory,
+          processingError: null,
+          processingStep: 0,
+          selectedImage: null,
         }),
     }),
     {
@@ -37,8 +52,8 @@ const useStore = create(
       partialize: (state) => ({
         token: state.token,
         user: state.user,
-        activeScan: state.activeScan,
         guestHistory: state.guestHistory,
+        activeScan: state.activeScan,
       }),
     },
   ),

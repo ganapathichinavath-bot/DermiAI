@@ -34,3 +34,14 @@ venv/
 # OS
 .DS_Store
 Thumbs.db
+firebase-credentials.json
+kaggle.json
+files.txt
+
+# Backend specific
+Backend/static/uploads/*
+!Backend/static/uploads/.gitkeep
+Backend/static/outputs/*
+!Backend/static/outputs/.gitkeep
+Backend/skin_diagnosis.db
+Backend/.env

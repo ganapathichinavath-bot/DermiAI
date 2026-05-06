@@ -1,141 +1,125 @@
-import { useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import AppShell from '../components/AppShell'
+import { useEffect, useState } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
 import api from '../api'
 import useStore from '../store/useStore'
 
 const steps = [
-  { title: 'Preprocessing', detail: 'Normalizing image tensors and validating upload integrity.' },
-  { title: 'Feature extraction', detail: 'Running convolutional passes over the lesion image.' },
-  { title: 'Classification', detail: 'Computing softmax confidence and top alternatives.' },
-  { title: 'Grad-CAM', detail: 'Backpropagating attention through the final convolutional layer.' },
+  "Uploading scan...",
+  "Processing deeply...",
+  "Generating Explainability..."
 ]
 
 export default function Processing() {
   const navigate = useNavigate()
-  const selectedImage = useStore((state) => state.selectedImage)
-  const token = useStore((state) => state.token)
-  const setActiveScan = useStore((state) => state.setActiveScan)
-  const addGuestScan = useStore((state) => state.addGuestScan)
-  const processingStep = useStore((state) => state.processingStep)
-  const setProcessingStep = useStore((state) => state.setProcessingStep)
-  const processingError = useStore((state) => state.processingError)
-  const setProcessingError = useStore((state) => state.setProcessingError)
-  const [isUploading, setIsUploading] = useState(false)
-
-  const currentStep = useMemo(() => Math.min(processingStep, steps.length - 1), [processingStep])
+  const location = useLocation()
+  const file = location.state?.file
+  const [currentStep, setCurrentStep] = useState(0)
+  const [error, setError] = useState(null)
+  const token = useStore((s) => s.token)
+  const addGuestScan = useStore((s) => s.addGuestScan)
 
   useEffect(() => {
-    if (!selectedImage?.file) {
+    if (!file) {
       navigate('/scan', { replace: true })
       return
     }
 
-    let cancelled = false
-    let ticker = 0
+    let isSubscribed = true
 
-    async function processScan() {
-      setIsUploading(true)
-      setProcessingError(null)
-      setProcessingStep(0)
-
-      ticker = window.setInterval(() => {
-        useStore.setState((state) => ({ processingStep: Math.min(state.processingStep + 1, steps.length - 1) }))
-      }, 1200)
-
+    const processUpload = async () => {
       try {
         const formData = new FormData()
-        formData.append('file', selectedImage.file)
-        const response = await api.post('/predict', formData, {
+        formData.append('file', file)
+        
+        // Progress step timer simulating pipeline phases
+        const stepTimer = setInterval(() => {
+          setCurrentStep(prev => Math.min(prev + 1, 2))
+        }, 1500)
+
+        const response = await api.post('/diagnose', formData, {
           headers: { 'Content-Type': 'multipart/form-data' },
         })
 
-        if (cancelled) return
-
-        const scan = {
-          ...response.data,
-          created_at: response.data.created_at || new Date().toISOString(),
+        if (!isSubscribed) {
+          clearInterval(stepTimer)
+          return
         }
-        setActiveScan(scan)
+
+        clearInterval(stepTimer)
+        setCurrentStep(2) // Force final step
+        
+        const result = response.data
         if (!token) {
-          addGuestScan(scan)
+          addGuestScan({
+            ...result,
+            created_at: new Date().toISOString(),
+          })
         }
 
-        window.clearInterval(ticker)
-        setProcessingStep(steps.length - 1)
-        window.setTimeout(() => navigate('/result', { replace: true }), 450)
-      } catch (error) {
-        if (cancelled) return
-        window.clearInterval(ticker)
-        setProcessingError(error?.response?.data?.detail || 'The API request failed. Check the backend and try again.')
-      } finally {
-        if (!cancelled) {
-          setIsUploading(false)
+        setTimeout(() => {
+          if (isSubscribed) {
+            navigate('/result', { replace: true, state: { result, originalFile: file } })
+          }
+        }, 1200)
+
+      } catch (err) {
+        if (isSubscribed) {
+          console.error(err)
+          setError("Failed to process scan. Please ensure the backend is running.")
         }
       }
     }
 
-    processScan()
+    processUpload()
 
     return () => {
-      cancelled = true
-      window.clearInterval(ticker)
+      isSubscribed = false
     }
-  }, [selectedImage, navigate, setActiveScan, addGuestScan, token, setProcessingError, setProcessingStep])
+  }, [file, navigate])
 
   return (
-    <AppShell
-      eyebrow="Inference pipeline"
-      title="Processing diagnostic scan"
-      description="This page stages the upload, runs the model, and computes a real Grad-CAM overlay before routing to the result screen."
-    >
-      <section className="grid gap-6 xl:grid-cols-[1fr_0.95fr]">
-        <div className="panel p-6">
-          <div className="space-y-4">
-            {steps.map((step, index) => {
-              const state = index < currentStep ? 'complete' : index === currentStep ? 'active' : 'pending'
+    <div className="flex flex-col items-center justify-center min-h-screen bg-[#0B0F19] p-6 text-white overflow-hidden relative">
+      {error ? (
+        <div className="text-center">
+          <p className="text-red-400 mb-4">{error}</p>
+          <button onClick={() => navigate('/scan')} className="btn-primary">Go Back</button>
+        </div>
+      ) : (
+        <div className="max-w-md w-full relative z-10 flex flex-col items-center">
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
+            className="w-24 h-24 mb-12 border-4 border-gray-800 border-t-[#6366F1] rounded-full"
+          />
+          
+          <div className="w-full space-y-4">
+            {steps.map((step, idx) => {
+              const isActive = idx === currentStep;
+              const isPast = idx < currentStep;
+              
               return (
-                <div key={step.title} className="panel-soft flex items-start gap-4 p-4">
-                  <div
-                    className={[
-                      'flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl text-sm font-semibold',
-                      state === 'complete'
-                        ? 'bg-emerald-400/15 text-emerald-200'
-                        : state === 'active'
-                          ? 'bg-cyan-300/15 text-cyan-100'
-                          : 'bg-white/5 text-slate-400',
-                    ].join(' ')}
-                  >
-                    {index + 1}
+                <div key={idx} className="flex items-center gap-4">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors duration-500 ${isPast ? 'bg-[#6366F1] text-white' : isActive ? 'border-2 border-[#6366F1] text-[#6366F1]' : 'border-2 border-gray-800 text-gray-700'}`}>
+                    {isPast ? (
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      </svg>
+                    ) : (
+                      <span className="text-sm font-bold">{idx + 1}</span>
+                    )}
                   </div>
-                  <div>
-                    <h2 className="text-lg font-semibold text-white">{step.title}</h2>
-                    <p className="mt-2 text-sm leading-7 text-slate-400">{step.detail}</p>
+                  <div className="flex-1">
+                    <p className={`font-medium transition-colors duration-500 ${isPast || isActive ? 'text-white' : 'text-gray-600'}`}>
+                      {step}
+                    </p>
                   </div>
                 </div>
               )
             })}
           </div>
         </div>
-
-        <div className="panel p-6">
-          <p className="text-xs uppercase tracking-[0.3em] text-cyan-200/70">Runtime status</p>
-          <h2 className="mt-2 text-2xl font-semibold text-white">
-            {processingError ? 'Processing stopped' : isUploading ? 'Model is running' : 'Wrapping up'}
-          </h2>
-          <p className="mt-4 text-sm leading-7 text-slate-400">
-            {processingError
-              ? processingError
-              : 'The stepper is synced to the expected inference stages while the backend processes the uploaded image.'}
-          </p>
-          <div className="mt-8 h-3 overflow-hidden rounded-full bg-white/5">
-            <div
-              className="h-full rounded-full bg-gradient-to-r from-cyan-300 to-sky-400 transition-all duration-700"
-              style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
-            />
-          </div>
-        </div>
-      </section>
-    </AppShell>
+      )}
+    </div>
   )
 }

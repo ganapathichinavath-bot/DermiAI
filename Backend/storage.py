@@ -1,48 +1,73 @@
 from __future__ import annotations
 
 import io
+import os
 import uuid
 from pathlib import Path
 
+import cloudinary
+import cloudinary.uploader
 import numpy as np
 from PIL import Image
+from dotenv import load_dotenv
 
+load_dotenv()
+
+# Configure Cloudinary
+cloudinary.config(
+    cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
+    api_key=os.getenv("CLOUDINARY_API_KEY"),
+    api_secret=os.getenv("CLOUDINARY_API_SECRET"),
+)
 
 BASE_DIR = Path(__file__).resolve().parent
-STATIC_DIR = BASE_DIR / "static"
-UPLOADS_DIR = STATIC_DIR / "uploads"
-OUTPUTS_DIR = STATIC_DIR / "outputs"
-MODELS_DIR = BASE_DIR / "models"
+
+def _upload_to_cloudinary(image_bytes: bytes, folder: str, filename: str) -> str:
+    """Uploads an image to Cloudinary and returns the secure URL."""
+    try:
+        response = cloudinary.uploader.upload(
+            image_bytes,
+            folder=folder,
+            public_id=filename,
+            overwrite=True,
+            resource_type="image"
+        )
+        return response.get("secure_url")
+    except Exception as e:
+        print(f"Cloudinary upload failed: {e}")
+        raise
 
 
-def ensure_storage_dirs() -> None:
-    for directory in (STATIC_DIR, UPLOADS_DIR, OUTPUTS_DIR, MODELS_DIR):
-        directory.mkdir(parents=True, exist_ok=True)
-
-
-def _public_url(path: Path) -> str:
-    relative = path.relative_to(STATIC_DIR).as_posix()
-    return f"/static/{relative}"
-
-
-def save_upload(image_bytes: bytes, filename: str | None = None) -> tuple[Path, str]:
-    ensure_storage_dirs()
+def save_upload(image_bytes: bytes, filename: str | None = None) -> tuple[str, str]:
+    """Saves original uploaded image to Cloudinary dermai/uploads/."""
+    safe_name = filename or f"{uuid.uuid4().hex}"
+    stem = Path(safe_name).stem
+    
+    # Compress/convert to JPEG for consistency before upload
     image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
-    safe_name = filename or f"{uuid.uuid4().hex}.jpg"
-    if not safe_name.lower().endswith((".jpg", ".jpeg", ".png", ".webp")):
-        safe_name = f"{Path(safe_name).stem}.jpg"
+    buf = io.BytesIO()
+    image.save(buf, format="JPEG", quality=95)
+    processed_bytes = buf.getvalue()
 
-    output_path = UPLOADS_DIR / f"{Path(safe_name).stem}.jpg"
-    image.save(output_path, format="JPEG", quality=95)
-    return output_path, _public_url(output_path)
+    url = _upload_to_cloudinary(processed_bytes, "dermai/uploads", stem)
+    # We return stem as the "path" equivalent, and url as public_url
+    return stem, url
 
 
-def save_array_image(image_np: np.ndarray, stem: str, folder: str = "outputs") -> tuple[Path, str]:
-    ensure_storage_dirs()
-    target_dir = OUTPUTS_DIR if folder == "outputs" else STATIC_DIR / folder
-    target_dir.mkdir(parents=True, exist_ok=True)
+def save_array_image(image_np: np.ndarray, stem: str, folder: str = "outputs") -> tuple[str, str]:
+    """
+    Saves a generated heatmap or saliency map.
+    Maps local "outputs" or "saliency" folder names to Cloudinary folders.
+    """
+    if folder == "saliency":
+        cloud_folder = "dermai/saliency"
+    else:
+        cloud_folder = "dermai/heatmaps"
 
-    output_path = target_dir / f"{stem}.jpg"
     image = Image.fromarray(image_np.astype("uint8"))
-    image.save(output_path, format="JPEG", quality=95)
-    return output_path, _public_url(output_path)
+    buf = io.BytesIO()
+    image.save(buf, format="JPEG", quality=95)
+    image_bytes = buf.getvalue()
+
+    url = _upload_to_cloudinary(image_bytes, cloud_folder, stem)
+    return stem, url

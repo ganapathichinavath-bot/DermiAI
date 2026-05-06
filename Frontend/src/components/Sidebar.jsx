@@ -3,11 +3,10 @@ import { motion } from 'framer-motion'
 import useStore from '../store/useStore'
 
 const links = [
-  { to: '/', label: 'Dashboard' },
-  { to: '/scan', label: 'New Scan' },
+  { to: '/scan', label: 'Scan' },
   { to: '/processing', label: 'Processing' },
   { to: '/result', label: 'Result' },
-  { to: '/explain', label: 'Explainability' },
+  { to: '/explain', label: 'Explain' },
   { to: '/history', label: 'History' },
 ]
 
@@ -26,11 +25,11 @@ export default function Sidebar() {
   const logout = useStore((state) => state.logout)
 
   return (
-    <aside className="border-r border-white/5 bg-slate-950/35 px-4 py-4 backdrop-blur-xl lg:min-h-screen">
+    <aside className="border-b border-white/5 bg-slate-950/35 px-4 py-4 backdrop-blur-xl lg:min-h-screen lg:border-b-0 lg:border-r">
       <div className="sticky top-4 space-y-6">
         <motion.button
           whileHover={{ y: -1 }}
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/dashboard')}
           className="flex w-full items-start justify-between rounded-3xl border border-white/10 bg-white/5 p-4 text-left"
         >
           <div>
