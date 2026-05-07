@@ -81,22 +81,39 @@ export default function Scan() {
   }
 
   function capturePhoto() {
-    if (!videoRef.current) return
-    const canvas = document.createElement('canvas')
-    canvas.width = videoRef.current.videoWidth
-    canvas.height = videoRef.current.videoHeight
-    const context = canvas.getContext('2d')
-    context.drawImage(videoRef.current, 0, 0)
-    canvas.toBlob(
-      (blob) => {
-        if (!blob) return
-        const file = new File([blob], `capture-${Date.now()}.jpg`, { type: 'image/jpeg' })
-        selectFile(file)
-        closeCamera()
-      },
-      'image/jpeg',
-      0.95,
-    )
+    if (!videoRef.current || !cameraOpen) return;
+    
+    try {
+      const video = videoRef.current;
+      const canvas = document.createElement('canvas');
+      
+      // Use the actual video track dimensions for highest quality
+      canvas.width = video.videoWidth || 1280;
+      canvas.height = video.videoHeight || 720;
+      
+      const context = canvas.getContext('2d');
+      if (!context) throw new Error("Could not get canvas context");
+      
+      // Draw frame
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) {
+            setError("Could not capture image.");
+            return;
+          }
+          const file = new File([blob], `capture-${Date.now()}.jpg`, { type: 'image/jpeg' });
+          selectFile(file);
+          closeCamera();
+        },
+        'image/jpeg',
+        0.95,
+      );
+    } catch (err) {
+      console.error("Capture failed:", err);
+      setError("Failed to capture photo.");
+    }
   }
 
   return (

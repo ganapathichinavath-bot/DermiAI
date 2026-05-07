@@ -43,23 +43,44 @@ export default function CameraCapture() {
   }
 
   function capturePhoto() {
-    if (!videoRef.current) return
-    const canvas = document.createElement('canvas')
-    canvas.width = videoRef.current.videoWidth
-    canvas.height = videoRef.current.videoHeight
-    canvas.getContext('2d').drawImage(videoRef.current, 0, 0)
-    canvas.toBlob(
-      (blob) => {
-        if (!blob) return
-        const file = new File([blob], `capture-${Date.now()}.jpg`, { type: 'image/jpeg' })
-        const url = URL.createObjectURL(blob)
-        setCaptured(url)
-        setCapturedFile(file)
-        stopCamera()
-      },
-      'image/jpeg',
-      0.95,
-    )
+    if (!videoRef.current || !cameraReady) {
+      console.error("Camera not ready or video element missing");
+      return;
+    }
+    
+    try {
+      const video = videoRef.current;
+      const canvas = document.createElement('canvas');
+      
+      // Use the actual video track dimensions for highest quality
+      canvas.width = video.videoWidth || 1280;
+      canvas.height = video.videoHeight || 720;
+      
+      const ctx = canvas.getContext('2d');
+      if (!ctx) throw new Error("Could not get canvas context");
+      
+      // Draw frame
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) {
+            setError("Failed to capture image blob.");
+            return;
+          }
+          const file = new File([blob], `capture-${Date.now()}.jpg`, { type: 'image/jpeg' });
+          const url = URL.createObjectURL(blob);
+          setCaptured(url);
+          setCapturedFile(file);
+          stopCamera();
+        },
+        'image/jpeg',
+        0.95,
+      );
+    } catch (err) {
+      console.error("Capture error:", err);
+      setError("An error occurred while capturing the photo.");
+    }
   }
 
   function retake() {
