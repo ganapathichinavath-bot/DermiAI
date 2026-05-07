@@ -45,7 +45,7 @@ export default function Loading() {
         clearInterval(timer)
         setStep(STEPS.length - 1)
 
-        const result = response.data
+
 
         setTimeout(() => {
           if (active) navigate('/result', { replace: true, state: { result, originalFile: file } })
