@@ -140,22 +140,25 @@ async def diagnose(
 
         result = run_inference(m, d, image_bytes, class_scales, demo)
 
-        from storage import save_upload, save_array_image
         import uuid
+        import numpy as np
+        from storage import save_upload, save_array_image, image_to_base64, bytes_to_base64
 
-        stem = uuid.uuid4().hex
-        _, original_url = save_upload(image_bytes, filename=f"{stem}.jpg")
-        
         heatmap_np = result["heatmap_img"]
         saliency_np = result["saliency_img"]
-        
-        # It's actually a PIL Image coming from run_inference, but save_array_image expects np.ndarray
-        import numpy as np
         heatmap_arr = np.array(heatmap_np)
         saliency_arr = np.array(saliency_np)
 
-        _, heatmap_url = save_array_image(heatmap_arr, f"gradcam_{stem}", folder="outputs")
-        _, saliency_url = save_array_image(saliency_arr, f"saliency_{stem}", folder="saliency")
+        if current_user:
+            stem = uuid.uuid4().hex
+            _, original_url = save_upload(image_bytes, filename=f"{stem}.jpg")
+            _, heatmap_url = save_array_image(heatmap_arr, f"gradcam_{stem}", folder="outputs")
+            _, saliency_url = save_array_image(saliency_arr, f"saliency_{stem}", folder="saliency")
+        else:
+            # GUEST: Use Base64, store nothing!
+            original_url = bytes_to_base64(image_bytes)
+            heatmap_url = image_to_base64(heatmap_arr)
+            saliency_url = image_to_base64(saliency_arr)
 
         payload = {
             "prediction": result["prediction"],
@@ -252,6 +255,14 @@ def delete_history_item(scan_id: int, current_user: User = Depends(get_current_u
     if not scan:
         raise HTTPException(status_code=404, detail="Scan not found")
         
+    from storage import delete_from_cloudinary
+    
+    # 1. Delete from Cloudinary
+    delete_from_cloudinary(scan.original_url)
+    delete_from_cloudinary(scan.heatmap_url)
+    delete_from_cloudinary(scan.saliency_url)
+    
+    # 2. Delete from DB
     db.delete(scan)
     db.commit()
     return {"message": "Deleted successfully"}
