@@ -69,10 +69,10 @@ export default function Landing() {
           </button>
           <button
             id="nav-start-btn"
-            onClick={() => navigate('/camera-info')}
+            onClick={() => navigate('/dashboard')}
             className="button-primary text-sm px-4 py-2"
           >
-            Start Scan
+            Dashboard
           </button>
         </div>
       </nav>
@@ -117,10 +117,10 @@ export default function Landing() {
               id="hero-start-btn"
               whileHover={{ scale: 1.04 }}
               whileTap={{ scale: 0.97 }}
-              onClick={() => navigate('/camera-info')}
+              onClick={() => navigate('/dashboard')}
               className="button-primary px-8 py-4 text-base shadow-2xl shadow-cyan-500/25"
             >
-              Start Free Scan →
+              Get Started →
             </motion.button>
             <motion.button
               id="hero-login-btn"
@@ -233,10 +233,10 @@ export default function Landing() {
             id="cta-start-btn"
             whileHover={{ scale: 1.04 }}
             whileTap={{ scale: 0.97 }}
-            onClick={() => navigate('/camera-info')}
+            onClick={() => navigate('/dashboard')}
             className="button-primary px-8 py-4 text-base shadow-2xl shadow-cyan-500/25"
           >
-            Get Started Free →
+            Open Dashboard →
           </motion.button>
         </motion.div>
       </section>
