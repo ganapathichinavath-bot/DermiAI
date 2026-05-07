@@ -7,5 +7,8 @@ export default defineConfig({
       jsxRuntime: 'automatic'
     })
   ],
-  build: { outDir: 'dist' }
+  build: { 
+    outDir: 'dist',
+    chunkSizeWarningLimit: 2000
+  }
 })
