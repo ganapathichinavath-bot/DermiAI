@@ -17,7 +17,6 @@ export default function Loading() {
   const [step, setStep] = useState(0)
   const [error, setError] = useState(null)
   const token = useStore((s) => s.token)
-  const addGuestScan = useStore((s) => s.addGuestScan)
 
   useEffect(() => {
     if (!file) {
@@ -46,9 +45,7 @@ export default function Loading() {
         clearInterval(timer)
         setStep(STEPS.length - 1)
 
-        if (!token) {
-          addGuestScan({ ...result, created_at: new Date().toISOString() })
-        }
+        const result = response.data
 
         setTimeout(() => {
           if (active) navigate('/result', { replace: true, state: { result, originalFile: file } })

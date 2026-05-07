@@ -17,7 +17,6 @@ export default function Processing() {
   const [currentStep, setCurrentStep] = useState(0)
   const [error, setError] = useState(null)
   const token = useStore((s) => s.token)
-  const addGuestScan = useStore((s) => s.addGuestScan)
 
   useEffect(() => {
     if (!file) {
@@ -50,12 +49,6 @@ export default function Processing() {
         setCurrentStep(2) // Force final step
         
         const result = response.data
-        if (!token) {
-          addGuestScan({
-            ...result,
-            created_at: new Date().toISOString(),
-          })
-        }
 
         setTimeout(() => {
           if (isSubscribed) {

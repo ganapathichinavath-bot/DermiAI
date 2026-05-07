@@ -1,13 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
-function createGuestRecord(scan) {
-  return {
-    ...scan,
-    id: scan.id ?? `guest-${crypto.randomUUID()}`,
-    created_at: scan.created_at ?? new Date().toISOString(),
-  }
-}
 
 const useStore = create(
   persist(
@@ -16,7 +9,6 @@ const useStore = create(
       user: null, // Will store { id, email, display_name, photo_url }
       selectedImage: null,
       activeScan: null,
-      guestHistory: [],
       processingError: null,
       processingStep: 0,
 
@@ -29,14 +21,6 @@ const useStore = create(
       setProcessingError: (processingError) => set({ processingError }),
       setProcessingStep: (processingStep) => set({ processingStep }),
       resetProcessingState: () => set({ processingError: null, processingStep: 0 }),
-      addGuestScan: (scan) =>
-        set((state) => ({
-          guestHistory: [createGuestRecord(scan), ...state.guestHistory].slice(0, 20),
-        })),
-      removeGuestScan: (id) =>
-        set((state) => ({
-          guestHistory: state.guestHistory.filter((s) => s.id !== id),
-        })),
       logout: () =>
         set({
           token: null,
@@ -52,7 +36,6 @@ const useStore = create(
       partialize: (state) => ({
         token: state.token,
         user: state.user,
-        guestHistory: state.guestHistory,
         activeScan: state.activeScan,
       }),
     },

@@ -10,7 +10,6 @@ export default function History() {
   const [history, setHistory] = useState([])
   const [loading, setLoading] = useState(true)
   const token = useStore((s) => s.token)
-  const guestHistory = useStore((s) => s.guestHistory)
 
   useEffect(() => {
     let mounted = true
@@ -115,11 +114,7 @@ export default function History() {
                               await api.delete(`/history/${record.id}`);
                               setHistory(prev => prev.filter(s => s.id !== record.id));
                             } catch (err) {
-                              console.error('Failed to delete', err);
                             }
-                          } else {
-                            useStore.getState().removeGuestScan(record.id);
-                            setHistory(prev => prev.filter(s => s.id !== record.id));
                           }
                         }}
                         className="text-gray-500 hover:text-red-400 transition p-2"
