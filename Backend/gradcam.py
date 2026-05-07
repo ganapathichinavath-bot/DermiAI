@@ -169,7 +169,14 @@ def run_inference(
     prediction_index = int(np.argmax(scaled_probs))
     max_prob = float(scaled_probs[prediction_index])
     
-    if max_prob < 0.45:
+    if max_prob < 0.25:
+        prediction_code = "unrelated"
+        prediction_detail = {
+            "name": "Invalid Image / Not a Skin Lesion",
+            "risk_severity": "N/A",
+            "risk_label": "Unknown"
+        }
+    elif max_prob < 0.45:
         prediction_code = "normal"
         prediction_detail = {
             "name": "Normal / No Disease Detected",
