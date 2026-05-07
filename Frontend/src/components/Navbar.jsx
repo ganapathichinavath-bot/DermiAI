@@ -30,6 +30,7 @@ export default function Navbar() {
     { name: 'Dashboard', path: '/dashboard' },
     { name: 'Scan', path: '/scan' },
     { name: 'History', path: '/history' },
+    { name: 'Profile', path: '/profile' },
   ]
 
   return (

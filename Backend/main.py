@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, File, UploadFile, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
+from pydantic import BaseModel
 
 from auth import get_current_user, get_optional_user
 from database import ScanHistory, User, create_tables, get_db
@@ -79,6 +80,11 @@ def health():
         "model_loaded": model is not None
     }
 
+class UserUpdate(BaseModel):
+    display_name: str | None = None
+    phone_number: str | None = None
+    bio: str | None = None
+
 # ================= AUTH =================
 
 @app.get("/me")
@@ -88,6 +94,8 @@ def get_me(current_user: User = Depends(get_current_user)):
         "google_id": current_user.google_id,
         "email": current_user.email,
         "display_name": current_user.display_name,
+        "phone_number": current_user.phone_number,
+        "bio": current_user.bio,
         "photo_url": current_user.photo_url,
     }
 
@@ -111,8 +119,34 @@ def auth_google(current_user: User = Depends(get_current_user)):
             "id": current_user.id,
             "email": current_user.email,
             "display_name": current_user.display_name,
+            "phone_number": current_user.phone_number,
+            "bio": current_user.bio,
             "photo_url": current_user.photo_url,
         }
+    }
+
+@app.patch("/me")
+def update_me(
+    data: UserUpdate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    if data.display_name is not None:
+        current_user.display_name = data.display_name
+    if data.phone_number is not None:
+        current_user.phone_number = data.phone_number
+    if data.bio is not None:
+        current_user.bio = data.bio
+    
+    db.commit()
+    db.refresh(current_user)
+    return {
+        "id": current_user.id,
+        "email": current_user.email,
+        "display_name": current_user.display_name,
+        "phone_number": current_user.phone_number,
+        "bio": current_user.bio,
+        "photo_url": current_user.photo_url,
     }
 
 

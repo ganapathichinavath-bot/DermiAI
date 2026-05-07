@@ -36,6 +36,8 @@ class User(Base):
     google_id = Column(String(255), unique=True, index=True, nullable=False)
     email = Column(String(255), unique=True, index=True, nullable=False)
     display_name = Column(String(255), nullable=True)
+    phone_number = Column(String(20), nullable=True)
+    bio = Column(Text, nullable=True)
     photo_url = Column(Text, nullable=True)
     first_login = Column(Boolean, default=True, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)

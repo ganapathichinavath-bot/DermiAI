@@ -14,6 +14,7 @@ import Landing from './Pages/Landing'
 import Camera from './Pages/Camera'
 import CameraCapture from './Pages/CameraCapture'
 import Loading from './Pages/Loading'
+import Profile from './Pages/Profile'
 import Navbar from './components/Navbar'
 
 export default function App() {
@@ -44,6 +45,7 @@ export default function App() {
           <Route path="/result" element={<Result />} />
           <Route path="/explain" element={<Explain />} />
           <Route path="/history" element={<History />} />
+          <Route path="/profile" element={<Profile />} />
 
           {/* ── Fallback ── */}
           <Route path="*" element={<Navigate to="/" replace />} />
