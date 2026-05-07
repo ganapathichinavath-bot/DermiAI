@@ -37,7 +37,7 @@ export default function Loading() {
         const form = new FormData()
         form.append('file', file)
 
-        const { data: result } = await api.post('/predict', form, {
+        const { data: result } = await api.post('/diagnose', form, {
           headers: { 'Content-Type': 'multipart/form-data' },
         })
 
