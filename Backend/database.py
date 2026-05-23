@@ -5,7 +5,7 @@ from datetime import datetime
 from pathlib import Path
 
 from dotenv import load_dotenv
-from sqlalchemy import Boolean, Column, DateTime, Float, ForeignKey, Integer, String, Text, create_engine
+from sqlalchemy import Boolean, Column, DateTime, Float, ForeignKey, Integer, String, Text, create_engine, UniqueConstraint
 from sqlalchemy.orm import Session, declarative_base, relationship, sessionmaker
 
 
@@ -35,6 +35,7 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     google_id = Column(String(255), unique=True, index=True, nullable=False)
     email = Column(String(255), unique=True, index=True, nullable=False)
+    username = Column(String(50), unique=True, index=True, nullable=True)
     display_name = Column(String(255), nullable=True)
     phone_number = Column(String(20), nullable=True)
     bio = Column(Text, nullable=True)

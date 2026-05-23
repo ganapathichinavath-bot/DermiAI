@@ -116,4 +116,9 @@
     box-shadow: 0 20px 45px rgba(56, 189, 248, 0.22);
     @apply inline-flex items-center justify-center rounded-2xl px-5 py-3 text-sm font-semibold transition hover:-translate-y-0.5;
   }
+
+  /* Standard input field */
+  .input-field {
+    @apply w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white text-sm outline-none transition placeholder:text-slate-600 focus:border-cyan-400/50 focus:bg-white/8 focus:ring-1 focus:ring-cyan-400/10;
+  }
 }

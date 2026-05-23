@@ -82,6 +82,7 @@ def health():
 
 class UserUpdate(BaseModel):
     display_name: str | None = None
+    username: str | None = None
     phone_number: str | None = None
     bio: str | None = None
 
@@ -93,6 +94,7 @@ def get_me(current_user: User = Depends(get_current_user)):
         "id": current_user.id,
         "google_id": current_user.google_id,
         "email": current_user.email,
+        "username": current_user.username,
         "display_name": current_user.display_name,
         "phone_number": current_user.phone_number,
         "bio": current_user.bio,
@@ -118,6 +120,7 @@ def auth_google(current_user: User = Depends(get_current_user)):
         "user": {
             "id": current_user.id,
             "email": current_user.email,
+            "username": current_user.username,
             "display_name": current_user.display_name,
             "phone_number": current_user.phone_number,
             "bio": current_user.bio,
@@ -131,18 +134,28 @@ def update_me(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
+    import re
+    if data.username is not None:
+        clean = re.sub(r'[^a-z0-9_]', '', data.username.lower().strip())[:30]
+        if not clean:
+            raise HTTPException(status_code=400, detail="Username must contain letters or numbers.")
+        existing = db.query(User).filter(User.username == clean, User.id != current_user.id).first()
+        if existing:
+            raise HTTPException(status_code=409, detail="That username is already taken. Please choose another.")
+        current_user.username = clean
     if data.display_name is not None:
         current_user.display_name = data.display_name
     if data.phone_number is not None:
         current_user.phone_number = data.phone_number
     if data.bio is not None:
         current_user.bio = data.bio
-    
+
     db.commit()
     db.refresh(current_user)
     return {
         "id": current_user.id,
         "email": current_user.email,
+        "username": current_user.username,
         "display_name": current_user.display_name,
         "phone_number": current_user.phone_number,
         "bio": current_user.bio,

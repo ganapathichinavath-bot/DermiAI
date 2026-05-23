@@ -2,6 +2,9 @@ from __future__ import annotations
 
 import json
 import os
+import re
+import random
+import string
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
@@ -28,6 +31,18 @@ if not firebase_admin._apps:
         print("WARNING: FIREBASE_CREDENTIALS not set. Auth will fail.")
 
 bearer_scheme = HTTPBearer(auto_error=False)
+
+
+def _generate_unique_username(base_name: str, db: Session) -> str:
+    """Slugify a display name and ensure it is unique in the DB."""
+    # Lowercase, keep letters/numbers, replace spaces/special chars with underscores
+    slug = re.sub(r'[^a-z0-9]', '_', base_name.lower().strip())
+    slug = re.sub(r'_+', '_', slug).strip('_')[:30] or 'user'
+    candidate = slug
+    while db.query(User).filter(User.username == candidate).first():
+        suffix = ''.join(random.choices(string.digits, k=4))
+        candidate = f"{slug}_{suffix}"
+    return candidate
 
 
 def _resolve_user(token: str, db: Session) -> User:
@@ -65,6 +80,7 @@ def _resolve_user(token: str, db: Session) -> User:
             google_id=google_id,
             email=email,
             display_name=display_name,
+            username=_generate_unique_username(display_name, db),
             photo_url=photo_url,
             first_login=True
         )
