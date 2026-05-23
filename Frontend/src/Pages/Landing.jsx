@@ -51,7 +51,7 @@ export default function Landing() {
       {/* ── Navbar ── */}
       <nav className="fixed inset-x-0 top-0 z-50 flex items-center justify-between px-6 py-4 backdrop-blur-xl border-b border-white/5">
         <button
-          onClick={() => navigate('/dashboard')}
+          onClick={() => navigate('/')}
           className="flex items-center gap-2 hover:opacity-80 transition"
         >
           <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-cyan-400 to-sky-600 flex items-center justify-center shadow-lg shadow-cyan-500/30">
@@ -69,10 +69,10 @@ export default function Landing() {
           </button>
           <button
             id="nav-start-btn"
-            onClick={() => navigate('/dashboard')}
+            onClick={() => navigate('/scan')}
             className="button-primary text-sm px-4 py-2"
           >
-            Dashboard
+            Start Scan
           </button>
         </div>
       </nav>
@@ -117,10 +117,10 @@ export default function Landing() {
               id="hero-start-btn"
               whileHover={{ scale: 1.04 }}
               whileTap={{ scale: 0.97 }}
-              onClick={() => navigate('/dashboard')}
+              onClick={() => navigate('/scan')}
               className="button-primary px-8 py-4 text-base shadow-2xl shadow-cyan-500/25"
             >
-              Get Started →
+              Start Scanning →
             </motion.button>
             <motion.button
               id="hero-login-btn"
@@ -233,10 +233,10 @@ export default function Landing() {
             id="cta-start-btn"
             whileHover={{ scale: 1.04 }}
             whileTap={{ scale: 0.97 }}
-            onClick={() => navigate('/dashboard')}
+            onClick={() => navigate('/scan')}
             className="button-primary px-8 py-4 text-base shadow-2xl shadow-cyan-500/25"
           >
-            Open Dashboard →
+            Start Scanning Now →
           </motion.button>
         </motion.div>
       </section>

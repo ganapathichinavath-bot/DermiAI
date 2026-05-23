@@ -74,4 +74,11 @@ def get_db():
 
 
 def create_tables() -> None:
-    Base.metadata.create_all(bind=engine)
+    try:
+        Base.metadata.create_all(bind=engine)
+        print("✅ Database tables verified/created successfully.")
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        print(f"⚠️ DATABASE ERROR ON STARTUP: {e}")
+        print("⚠️ Application will start, but database connection is currently offline. Please ensure Supabase project is unpaused/active.")
