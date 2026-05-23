@@ -98,7 +98,12 @@ def predict_probs_tta(model: tf.keras.Model, img_rgb_uint8: np.ndarray, class_sc
     variants = _tta_variants(img_rgb_uint8)
     batch = np.stack([_preprocess_for_model(v) for v in variants], axis=0)
     logits = model(batch, training=False).numpy()
-    probs = tf.nn.softmax(logits, axis=-1).numpy().mean(axis=0)
+    # Check if the model already outputs softmax probabilities (sums to 1.0, all positive)
+    is_prob = np.allclose(np.sum(logits, axis=-1), 1.0, atol=1e-4) and np.all(logits >= -1e-5)
+    if is_prob:
+        probs = logits.mean(axis=0)
+    else:
+        probs = tf.nn.softmax(logits, axis=-1).numpy().mean(axis=0)
     return _scaled_probs(probs, class_scales)
 
 def overlay_heatmap(original_np: np.ndarray, cam: np.ndarray) -> np.ndarray:

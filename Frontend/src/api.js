@@ -18,7 +18,7 @@ api.interceptors.request.use((config) => {
 
 export function assetUrl(path) {
   if (!path) return ''
-  if (/^https?:\/\//.test(path)) return path
+  if (/^https?:\/\//.test(path) || /^data:/.test(path)) return path
   return `${API_BASE_URL.replace(/\/$/, '')}${path.startsWith('/') ? path : `/${path}`}`
 }
 

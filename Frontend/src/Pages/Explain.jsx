@@ -121,36 +121,31 @@ export default function Explain() {
             {activeTab === 'compare' && (
               <div 
                 ref={containerRef}
-                className="relative w-full h-full max-h-[60vh] select-none cursor-ew-resize group"
+                className="relative w-full h-full max-h-[60vh] select-none cursor-ew-resize group flex items-center justify-center"
                 onMouseMove={handleMouseMove}
                 onTouchMove={handleTouchMove}
               >
-                {/* Under image (Grad-CAM) */}
+                {/* Under image (Grad-CAM) - statically positioned to give container its size */}
                 <img 
                   src={heatmapUrl} 
                   alt="Grad-CAM" 
-                  className="absolute inset-0 w-full h-full object-contain pointer-events-none"
+                  className="w-full h-full object-contain max-h-[60vh] pointer-events-none"
                 />
                 
-                {/* Over image (Original) masked by slider */}
-                <div 
-                  className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none"
-                  style={{ width: `${sliderPos}%` }}
-                >
-                  <img 
-                    src={originalUrl} 
-                    alt="Original" 
-                    className="absolute inset-0 w-[100vw] max-w-3xl h-full object-contain pointer-events-none origin-left"
-                    style={{ width: containerRef.current ? containerRef.current.offsetWidth : '100%' }}
-                  />
-                </div>
+                {/* Over image (Original) - absolutely positioned and masked via CSS clip-path */}
+                <img 
+                  src={originalUrl} 
+                  alt="Original" 
+                  className="absolute inset-0 w-full h-full object-contain max-h-[60vh] pointer-events-none"
+                  style={{ clipPath: `polygon(0 0, ${sliderPos}% 0, ${sliderPos}% 100%, 0 100%)` }}
+                />
 
                 {/* Slider Handle */}
                 <div 
-                  className="absolute top-0 bottom-0 w-1 bg-white cursor-ew-resize flex items-center justify-center pointer-events-none shadow-[0_0_10px_rgba(0,0,0,0.5)]"
+                  className="absolute top-0 bottom-0 w-0.5 bg-white cursor-ew-resize flex items-center justify-center pointer-events-none shadow-[0_0_10px_rgba(0,0,0,0.5)]"
                   style={{ left: `${sliderPos}%` }}
                 >
-                  <div className="w-8 h-8 rounded-full bg-white shadow-lg flex items-center justify-center transform -translate-x-1/2 group-hover:scale-110 transition-transform">
+                  <div className="w-8 h-8 rounded-full bg-white shadow-lg flex items-center justify-center transform -translate-x-1/2 group-hover:scale-110 transition-transform border border-[#6366F1]/20">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[#6366F1]" viewBox="0 0 20 20" fill="currentColor">
                       <path d="M8 5a1 1 0 100 2h5.586l-1.293 1.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L13.586 5H8zM12 15a1 1 0 100-2H6.414l1.293-1.293a1 1 0 10-1.414-1.414l-3 3a1 1 0 000 1.414l3 3a1 1 0 001.414-1.414L6.414 15H12z" />
                     </svg>
