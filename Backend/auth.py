@@ -80,10 +80,15 @@ def _resolve_user(token: str, db: Session) -> User:
         db.commit()
         db.refresh(user)
     else:
-        # Update display_name/photo_url if they changed
-        if user.display_name != display_name or user.photo_url != photo_url:
+        # Sync changes from Google to DB (without overwriting custom display_name if set)
+        needs_update = False
+        if not user.display_name and display_name:
             user.display_name = display_name
+            needs_update = True
+        if user.photo_url != photo_url:
             user.photo_url = photo_url
+            needs_update = True
+        if needs_update:
             db.commit()
             db.refresh(user)
 
