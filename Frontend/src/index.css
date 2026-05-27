@@ -5,27 +5,27 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: light;
-  --bg: #ffffff;
-  --panel: rgba(255, 255, 255, 0.9);
-  --panel-soft: rgba(0, 0, 0, 0.04);
-  --border: rgba(0, 0, 0, 0.1);
-  --text: #0f172a;
-  --muted: #64748b;
-  --accent: #0ea5e9;
-  --accent-strong: #0284c7;
+  color-scheme: dark;
+  --bg: #0b0f1a;
+  --panel: rgba(16, 22, 37, 0.86);
+  --panel-soft: rgba(255, 255, 255, 0.04);
+  --border: rgba(255, 255, 255, 0.08);
+  --text: #f4f8ff;
+  --muted: #94a3b8;
+  --accent: #67e8f9;
+  --accent-strong: #38bdf8;
 }
 
 @layer base {
   * {
-    @apply border-slate-200;
+    @apply border-slate-800;
   }
 
   html {
     background:
-      radial-gradient(circle at top left, rgba(14, 165, 233, 0.1), transparent 28%),
-      radial-gradient(circle at top right, rgba(2, 132, 199, 0.08), transparent 22%),
-      linear-gradient(180deg, #f8fafc 0%, #f1f5f9 60%, #e2e8f0 100%);
+      radial-gradient(circle at top left, rgba(56, 189, 248, 0.18), transparent 28%),
+      radial-gradient(circle at top right, rgba(14, 165, 233, 0.14), transparent 22%),
+      linear-gradient(180deg, #0b0f1a 0%, #0d1322 60%, #09111f 100%);
   }
 
   body {
@@ -55,11 +55,11 @@
   }
 
   .panel {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 0.9));
+    background: linear-gradient(180deg, rgba(16, 22, 37, 0.92), rgba(11, 17, 30, 0.9));
     border: 1px solid var(--border);
     box-shadow:
-      0 12px 40px rgba(0, 0, 0, 0.05),
-      inset 0 1px 0 rgba(255, 255, 255, 0.5);
+      0 24px 80px rgba(2, 6, 23, 0.45),
+      inset 0 1px 0 rgba(255, 255, 255, 0.04);
     @apply rounded-[2rem] backdrop-blur-xl;
   }
 
@@ -71,87 +71,54 @@
 
   .button-primary {
     background: linear-gradient(135deg, var(--accent), var(--accent-strong));
-    color: #ffffff;
-    box-shadow: 0 10px 25px rgba(14, 165, 233, 0.25);
+    color: #03111b;
+    box-shadow: 0 20px 45px rgba(56, 189, 248, 0.22);
     @apply inline-flex items-center justify-center rounded-2xl px-5 py-3 text-sm font-semibold transition hover:-translate-y-0.5;
   }
 
   .button-secondary {
-    background: rgba(0, 0, 0, 0.05);
+    background: rgba(255, 255, 255, 0.05);
     border: 1px solid var(--border);
     color: var(--text);
-    @apply inline-flex items-center justify-center rounded-2xl px-5 py-3 text-sm font-semibold transition hover:bg-black/5;
+    @apply inline-flex items-center justify-center rounded-2xl px-5 py-3 text-sm font-semibold transition hover:bg-white/10;
   }
 
   .auth-page {
     @apply flex min-h-screen items-center justify-center p-6;
     background:
-      radial-gradient(circle at center, rgba(14, 165, 233, 0.1), transparent 24%),
-      linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
+      radial-gradient(circle at center, rgba(56, 189, 248, 0.18), transparent 24%),
+      linear-gradient(180deg, #0b0f1a 0%, #09121f 100%);
   }
 
   .auth-card {
-    @apply w-full max-w-md rounded-[2rem] border border-black/10 p-8 shadow-xl backdrop-blur-xl;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 0.9));
+    @apply w-full max-w-md rounded-[2rem] border border-white/10 p-8 shadow-2xl backdrop-blur-xl;
+    background: linear-gradient(180deg, rgba(14, 20, 33, 0.92), rgba(9, 14, 25, 0.96));
   }
 
   .auth-input {
-    @apply w-full rounded-2xl border border-black/10 bg-black/5 px-4 py-3 text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-cyan-500/60 focus:bg-white;
+    @apply w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-300/60 focus:bg-white/10;
   }
 
   /* Dashboard glass card — used in Dashboard.jsx */
   .glass-panel {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(248, 250, 252, 0.85));
-    border: 1px solid rgba(0, 0, 0, 0.08);
+    background: linear-gradient(180deg, rgba(16, 22, 37, 0.88), rgba(11, 17, 30, 0.85));
+    border: 1px solid rgba(255, 255, 255, 0.08);
     box-shadow:
-      0 10px 30px rgba(0, 0, 0, 0.05),
-      inset 0 1px 0 rgba(255, 255, 255, 0.5);
+      0 20px 60px rgba(2, 6, 23, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.04);
     @apply rounded-[2rem] backdrop-blur-xl;
   }
 
   /* Alias for button-primary — some pages use btn-primary */
   .btn-primary {
     background: linear-gradient(135deg, var(--accent), var(--accent-strong));
-    color: #ffffff;
-    box-shadow: 0 10px 25px rgba(14, 165, 233, 0.25);
+    color: #03111b;
+    box-shadow: 0 20px 45px rgba(56, 189, 248, 0.22);
     @apply inline-flex items-center justify-center rounded-2xl px-5 py-3 text-sm font-semibold transition hover:-translate-y-0.5;
   }
 
   /* Standard input field */
   .input-field {
-    @apply w-full rounded-xl border border-black/10 bg-black/5 px-4 py-3 text-slate-800 text-sm outline-none transition placeholder:text-slate-500 focus:border-cyan-500/50 focus:bg-white focus:ring-1 focus:ring-cyan-500/10;
-  }
-}
-
-@layer utilities {
-  .text-white {
-    @apply text-slate-900 !important;
-  }
-  .text-white\/70 {
-    @apply text-slate-900/70 !important;
-  }
-  .text-white\/75 {
-    @apply text-slate-900/75 !important;
-  }
-  .text-gray-200 {
-    @apply text-slate-800 !important;
-  }
-  .text-gray-300 {
-    @apply text-slate-700 !important;
-  }
-  .text-gray-400 {
-    @apply text-slate-600 !important;
-  }
-  .bg-white\/5 {
-    @apply bg-black/5 !important;
-  }
-  .bg-white\/10 {
-    @apply bg-black/10 !important;
-  }
-  .border-white\/10 {
-    @apply border-black/10 !important;
-  }
-  .border-white\/20 {
-    @apply border-black/20 !important;
+    @apply w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white text-sm outline-none transition placeholder:text-slate-600 focus:border-cyan-400/50 focus:bg-white/8 focus:ring-1 focus:ring-cyan-400/10;
   }
 }
