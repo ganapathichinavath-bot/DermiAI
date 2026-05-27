@@ -122,3 +122,36 @@
     @apply w-full rounded-xl border border-black/10 bg-black/5 px-4 py-3 text-slate-800 text-sm outline-none transition placeholder:text-slate-500 focus:border-cyan-500/50 focus:bg-white focus:ring-1 focus:ring-cyan-500/10;
   }
 }
+
+@layer utilities {
+  .text-white {
+    @apply text-slate-900 !important;
+  }
+  .text-white\/70 {
+    @apply text-slate-900/70 !important;
+  }
+  .text-white\/75 {
+    @apply text-slate-900/75 !important;
+  }
+  .text-gray-200 {
+    @apply text-slate-800 !important;
+  }
+  .text-gray-300 {
+    @apply text-slate-700 !important;
+  }
+  .text-gray-400 {
+    @apply text-slate-600 !important;
+  }
+  .bg-white\/5 {
+    @apply bg-black/5 !important;
+  }
+  .bg-white\/10 {
+    @apply bg-black/10 !important;
+  }
+  .border-white\/10 {
+    @apply border-black/10 !important;
+  }
+  .border-white\/20 {
+    @apply border-black/20 !important;
+  }
+}
