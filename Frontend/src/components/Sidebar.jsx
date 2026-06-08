@@ -57,8 +57,10 @@ export default function Sidebar() {
             {user ? (
               <button
                 onClick={() => {
-                  logout()
-                  navigate('/')
+                  if (window.confirm("Are you sure you want to log out?")) {
+                    logout()
+                    navigate('/')
+                  }
                 }}
                 className="button-secondary flex-1"
               >
