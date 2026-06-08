@@ -35,6 +35,7 @@ venv/
 .DS_Store
 Thumbs.db
 firebase-credentials.json
+dermai-defa2-firebase-adminsdk-fbsvc-5329ad48f9.json
 kaggle.json
 files.txt
 
@@ -49,10 +50,7 @@ Backend/.env
 # Node / Frontend
 node_modules/
 dist/
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env*
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
