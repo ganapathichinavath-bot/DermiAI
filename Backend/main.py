@@ -128,7 +128,7 @@ def auth_google(current_user: User = Depends(get_current_user)):
         }
     }
 
-@app.put("/me")
+@app.post("/update-profile")
 def update_me(
     data: UserUpdate,
     current_user: User = Depends(get_current_user),
