@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
+import useStore from '../store/useStore'
 
 const features = [
   {
@@ -45,6 +46,7 @@ const diseases = [
 
 export default function Landing() {
   const navigate = useNavigate()
+  const user = useStore((state) => state.user)
 
   return (
     <div className="min-h-screen overflow-x-hidden" style={{ background: 'var(--bg)' }}>
@@ -60,13 +62,15 @@ export default function Landing() {
           <span className="text-white font-bold text-lg tracking-tight">DermAI</span>
         </button>
         <div className="flex items-center gap-3">
-          <button
-            id="nav-login-btn"
-            onClick={() => navigate('/login')}
-            className="button-secondary text-sm px-4 py-2"
-          >
-            Sign In
-          </button>
+          {!user && (
+            <button
+              id="nav-login-btn"
+              onClick={() => navigate('/login')}
+              className="button-secondary text-sm px-4 py-2"
+            >
+              Sign In
+            </button>
+          )}
           <button
             id="nav-start-btn"
             onClick={() => navigate('/scan')}
@@ -122,15 +126,17 @@ export default function Landing() {
             >
               Start Scanning →
             </motion.button>
-            <motion.button
-              id="hero-login-btn"
-              whileHover={{ scale: 1.04 }}
-              whileTap={{ scale: 0.97 }}
-              onClick={() => navigate('/login')}
-              className="button-secondary px-8 py-4 text-base"
-            >
-              Sign In
-            </motion.button>
+            {!user && (
+              <motion.button
+                id="hero-login-btn"
+                whileHover={{ scale: 1.04 }}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => navigate('/login')}
+                className="button-secondary px-8 py-4 text-base"
+              >
+                Sign In
+              </motion.button>
+            )}
           </div>
 
           <p className="mt-4 text-xs text-slate-600">
