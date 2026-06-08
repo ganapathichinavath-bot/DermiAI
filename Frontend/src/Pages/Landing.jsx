@@ -64,17 +64,22 @@ export default function Landing() {
         <div className="flex items-center gap-3">
           {user ? (
             <button
-              onClick={() => navigate('/profile')}
-              className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-cyan-400 to-sky-600 shadow-lg shadow-cyan-500/30 hover:opacity-80 transition overflow-hidden border border-white/10"
-              title="Profile"
+              onClick={() => navigate('/dashboard')}
+              className="flex items-center gap-3 hover:bg-white/5 p-1 rounded-full pr-4 transition border border-transparent hover:border-white/10"
+              title="Go to Dashboard"
             >
-              {user.photo_url ? (
-                <img src={user.photo_url} alt="Profile" className="w-full h-full object-cover" />
-              ) : (
-                <span className="text-white font-bold text-sm">
-                  {(user.display_name || user.email || 'U').charAt(0).toUpperCase()}
-                </span>
-              )}
+              <div className="flex items-center justify-center w-9 h-9 rounded-full bg-gradient-to-br from-cyan-400 to-sky-600 shadow-lg shadow-cyan-500/30 overflow-hidden border border-white/10 shrink-0">
+                {user.photo_url ? (
+                  <img src={user.photo_url} alt="Profile" className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-white font-bold text-sm">
+                    {(user.display_name || user.email || 'U').charAt(0).toUpperCase()}
+                  </span>
+                )}
+              </div>
+              <span className="text-white text-sm font-medium">
+                {user.display_name || user.email?.split('@')[0]}
+              </span>
             </button>
           ) : (
             <button
