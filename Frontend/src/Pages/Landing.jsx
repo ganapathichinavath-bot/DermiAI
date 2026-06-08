@@ -73,15 +73,6 @@ export default function Landing() {
               className="button-secondary text-sm px-4 py-2"
             >
               Sign In
-            </button>
-          )}
-          <button
-            id="nav-start-btn"
-            onClick={() => navigate('/scan')}
-            className="button-primary text-sm px-4 py-2"
-          >
-            Start Scan
-          </button>
         </div>
       </nav>
 
