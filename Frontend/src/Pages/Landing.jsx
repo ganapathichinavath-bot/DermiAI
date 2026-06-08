@@ -83,6 +83,8 @@ export default function Landing() {
               className="button-secondary text-sm px-4 py-2"
             >
               Sign In
+            </button>
+          )}
         </div>
       </nav>
 
