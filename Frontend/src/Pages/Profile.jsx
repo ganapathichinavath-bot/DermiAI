@@ -117,7 +117,7 @@ export default function Profile() {
 
     setLoading(true)
     try {
-      const { data: updated } = await api.patch('/me', {
+      const { data: updated } = await api.put('/me', {
         display_name: form.display_name.trim(),
         username: form.username.toLowerCase().replace(/[^a-z0-9_]/g, ''),
         phone_number: form.phone_number.trim(),
