@@ -62,7 +62,11 @@ export default function Landing() {
           <span className="text-white font-bold text-lg tracking-tight">DermAI</span>
         </button>
         <div className="flex items-center gap-3">
-          {!user && (
+          {user ? (
+            <span className="text-white text-sm font-medium px-2">
+              Welcome, {user.display_name || user.email?.split('@')[0]}!
+            </span>
+          ) : (
             <button
               id="nav-login-btn"
               onClick={() => navigate('/login')}
