@@ -16,4 +16,4 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          git push https://huggingface.co/spaces/ganirathod/dermAI-Backend `git subtree split --prefix Backend main`:main --force
+          git push https://ganirathod:$HF_TOKEN@huggingface.co/spaces/ganirathod/dermai-backend `git subtree split --prefix Backend main`:main --force

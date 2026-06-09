@@ -11,7 +11,7 @@ const features = [
       </svg>
     ),
     title: 'AI-Powered Analysis',
-    desc: 'State-of-the-art model with 81% test accuracy and 0.97 Micro AUC, trained on 10,000+ clinical images.',
+    desc: 'Calibrated model with 82.5% test accuracy, 0.71 macro F1, and 0.98 micro AUC on HAM10000.',
   },
   {
     icon: (

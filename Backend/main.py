@@ -7,6 +7,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, File, UploadFile, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 
@@ -73,11 +74,40 @@ def _startup_warm_load():
         print("⚠️ Model warm-load failed:", repr(e))
 
 
+@app.get("/", response_class=HTMLResponse)
+def root():
+    return """<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Derm AI API</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 40rem; margin: 3rem auto; padding: 0 1rem; color: #1e293b; }
+    h1 { color: #4f46e5; }
+    a { color: #4f46e5; }
+    code { background: #f1f5f9; padding: 0.15rem 0.4rem; border-radius: 0.25rem; }
+  </style>
+</head>
+<body>
+  <h1>Derm AI API</h1>
+  <p>Backend for skin lesion diagnosis with Grad-CAM explainability.</p>
+  <p><strong>Model:</strong> 82.5% accuracy · 0.71 macro F1 · 0.98 micro AUC (HAM10000 test set)</p>
+  <ul>
+    <li><a href="/docs">API docs</a> (<code>/docs</code>)</li>
+    <li><a href="/health">Health check</a> (<code>/health</code>)</li>
+  </ul>
+  <p><small>Educational use only — not a medical device.</small></p>
+</body>
+</html>"""
+
+
 @app.get("/health")
 def health():
     return {
         "status": "ok",
-        "model_loaded": model is not None
+        "model_loaded": model is not None,
+        "model_repo": os.getenv("HF_MODEL_REPO", "ganirathod/dermiAI"),
     }
 
 class UserUpdate(BaseModel):

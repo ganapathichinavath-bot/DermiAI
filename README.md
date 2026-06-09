@@ -1,67 +1,72 @@
 # DermAI — AI Skin Diagnosis + Grad-CAM
 
-This is a full-stack web app for AI-powered skin lesion diagnosis with **real Grad-CAM explainability**, camera capture, and Firebase authentication.
+Full-stack web app for AI-powered skin lesion diagnosis with **real Grad-CAM explainability**, camera capture, and Firebase authentication.
+
+## Model performance (HAM10000 test set)
+
+| Metric | Value |
+|--------|-------|
+| Test accuracy | **82.54%** |
+| Macro F1 | **0.7073** (baseline 0.6356) |
+| Micro AUC | **0.9777** |
+| Macro AUC | **0.9566** |
+
+**Weights:** [ganirathod/dermiAI](https://huggingface.co/ganirathod/dermiAI)  
+**Backend API:** [Hugging Face Space](https://huggingface.co/spaces/ganirathod/dermai-backend)
+
+Calibration scales (`class_scales.json`) rebalance predictions — especially reducing over-prediction of the dominant `nv` (nevus) class (`nv: 1.45`).
 
 ## Features
 
 - **Image input**: File upload or camera capture (MediaDevices API)
-- **Prediction**: Class label + confidence + top-3 probabilities
-- **Explainability**: Real Grad-CAM heatmap overlay + saliency maps
-- **Storage**: Cloudinary for image storage
-- **Auth**: Firebase Authentication (Google Sign-In)
-- **Database**: SQLite for scan history persistence
-- **Guest mode**: Usable without an account (images processed temporarily via Base64)
+- **Prediction**: 7-class label + confidence + top-3 probabilities
+- **Explainability**: Grad-CAM heatmap + saliency maps
+- **Auth**: Firebase Google Sign-In
+- **Guest mode**: Diagnose without login (Base64 in-memory, no cloud storage)
+- **History**: Scan history for authenticated users (Cloudinary + database)
 
-## Tech Stack
+## Tech stack
 
-- **Frontend**: React (Vite), Tailwind CSS, Framer Motion, React Router, Zustand, Firebase
-- **Backend**: FastAPI, Keras/TensorFlow, OpenCV, NumPy, Pillow, SQLAlchemy
+| Layer | Technologies |
+|-------|--------------|
+| Frontend | React, Vite, Tailwind CSS, Framer Motion, React Router, Zustand, Axios, Firebase Auth |
+| Backend | FastAPI, TensorFlow/Keras, OpenCV, NumPy, Pillow, SQLAlchemy |
+| Model | EfficientNetV2 + TTA + calibrated class scales |
+| Storage | Cloudinary (images), PostgreSQL/Supabase (users & history) |
+| Email | SendGrid (welcome emails) |
+| Deploy | Vercel (frontend), Hugging Face Spaces (backend) |
 
-## Local Development
+## Local development
 
 ### Backend
 
-1. Create a virtual environment and install dependencies:
 ```bash
 cd Backend
 python -m venv venv
 venv\Scripts\activate
 pip install -r requirements.txt
+cp .env.example .env   # fill in secrets
+python download_model.py   # optional: fetch weights from HF
+uvicorn main:app --reload --port 8000
 ```
-
-2. Configure environment variables (copy `.env.example` to `.env`):
-- `MODEL_PATH`: Path to your `.keras` model
-- `FRONTEND_URL` / `CORS_ORIGINS`: Your frontend URL for CORS
-- Firebase Admin SDK credentials
-- Cloudinary credentials
-
-3. Run the server:
-```bash
-uvicorn main:app --reload
-```
-The backend runs at `http://127.0.0.1:8000`.
 
 ### Frontend
 
-1. Install dependencies and start the dev server:
 ```bash
 cd Frontend
 npm install
+cp .env.example .env.development   # VITE_API_URL=http://localhost:8000
 npm run dev
 ```
 
-2. Configure environment variables (copy `.env.example` to `.env.development`):
-- `VITE_API_URL`: URL of your backend (e.g. `http://127.0.0.1:8000`)
-- Firebase config keys
-
-The frontend runs at `http://localhost:5173`.
+Open `http://localhost:5173`.
 
 ## Deployment
 
-- **Frontend**: Configured for Vercel.
-- **Backend**: Configured for Hugging Face Spaces.
-- **Automation**: Includes a GitHub Action (`.github/workflows/huggingface-sync.yml`) to automatically deploy the backend to Hugging Face when changes are pushed to GitHub.
+- **Frontend** → Vercel (`VITE_API_URL` points to HF Space URL)
+- **Backend** → Hugging Face Space (Docker, port 7860)
+- **CI** → GitHub Action syncs `Backend/` to HF on push to `main`
 
 ## Disclaimer
 
-This application is **not** a medical device and should not be used for self-diagnosis. It is intended for educational and research purposes only. Always consult a qualified healthcare professional for medical advice.
+This application is **not** a medical device. For educational and research purposes only. Always consult a qualified healthcare professional for medical advice.

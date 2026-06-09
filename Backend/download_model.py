@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-HF_REPO = os.getenv("HF_MODEL_REPO", "dermai/dermai-model")
+HF_REPO = os.getenv("HF_MODEL_REPO", "ganirathod/dermiAI")
 FILENAME = "best_final.keras"
 BASE_DIR = Path(__file__).resolve().parent
 
